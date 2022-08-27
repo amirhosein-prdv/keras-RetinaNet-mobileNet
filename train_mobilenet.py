@@ -25,12 +25,15 @@ import pickle
 from keras_retinanet.models.mobilenet import MobileNetRetinaNet
 from keras_retinanet.preprocessing.csv_generator import CSVGenerator
 import keras_retinanet
+from keras_retinanet.callbacks.eval import Evaluate
 import matplotlib.pyplot as plt
+from keras_retinanet.utils.gpu import setup_gpu
+import multiprocessing
 
 def get_session():
-    config = tf.ConfigProto()
+    config = tf.compat.v1.ConfigProto()
     config.gpu_options.allow_growth = True
-    return tf.Session(config=config)
+    return tf.compat.v1.Session(config=config)
 
 
 def create_model(num_classes, alpha =1):
@@ -50,10 +53,13 @@ def parse_args():
 if __name__ == '__main__':
     # parse arguments
     args = parse_args()
+    train_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\train.csv"
+    classes = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\classes.csv"
+    val_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\val.csv"
+    test_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\test.csv"
 
-    train_path = "/home/aragon/workspace/datasets/obj_detection_rdc2/train_linux.csv"
-    classes = "/home/aragon/workspace/datasets/obj_detection_rdc2/classes.csv"
-    val_path = "/home/aragon/workspace/datasets/obj_detection_rdc2/val_linux.csv"
+    setup_gpu('0')
+    # get_session()
 
     # create image data generator objects
     train_image_data_generator = keras.preprocessing.image.ImageDataGenerator(
@@ -68,11 +74,23 @@ if __name__ == '__main__':
         batch_size=args.batch_size
     )
 
+
+    val_image_data_generator = keras.preprocessing.image.ImageDataGenerator()
+
+    # create a generator for validation data
+    val_generator = CSVGenerator(
+        csv_data_file=val_path,
+        csv_class_file=classes,
+        image_data_generator=val_image_data_generator,
+        batch_size=args.batch_size
+    )
+
+
     test_image_data_generator = keras.preprocessing.image.ImageDataGenerator()
 
     # create a generator for testing data
     test_generator = CSVGenerator(
-        csv_data_file=val_path,
+        csv_data_file=test_path,
         csv_class_file=classes,
         image_data_generator=test_image_data_generator,
         batch_size=args.batch_size
@@ -85,16 +103,27 @@ if __name__ == '__main__':
     print('Creating model, this may take a second...')
     model = create_model(num_classes=num_classes, alpha=args.alpha)
 
+    metrics = [
+        # keras.metrics.AUC(),
+        # keras.metrics.Precision(),
+        # keras.metrics.Recall(),
+        # keras.metrics.MeanIoU(num_classes=1)
+    ]
+    
     model.compile(
         loss={
             'regression'    : keras_retinanet.losses.smooth_l1(),
             'classification': keras_retinanet.losses.focal()
         },
-        optimizer=keras.optimizers.adam(lr=2e-5, clipnorm=0.001)
+        optimizer=keras.optimizers.adam(lr=2e-5, clipnorm=0.001),
+        metrics=metrics
     )
 
     # print model summary
     print(model.summary())
+
+    from keras.utils.vis_utils import plot_model
+    plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
 
     model_name = "mobilenet_a{}_s8_rdc2".format(args.alpha)
     model_dir = os.path.join("snapshots",model_name)
@@ -112,13 +141,14 @@ if __name__ == '__main__':
         epochs=100,
         verbose=1,
         max_queue_size=20,
-        validation_data=test_generator,
-        validation_steps=test_generator.size() // (args.batch_size),
+        workers=multiprocessing.cpu_count(),
+        validation_data=val_generator,
+        validation_steps=val_generator.size() // (args.batch_size),
         callbacks=[
             keras.callbacks.ModelCheckpoint(checkpoint_fname, monitor='val_loss', verbose=1, save_best_only=True),
-            keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=0, min_lr=0),
-            keras.callbacks.EarlyStopping(
-                monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='auto')
+            keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=1, min_lr=0),
+            keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto'),
+            # Evaluate(test_generator, weighted_average=True)
         ],
     )
     with open(os.path.join(model_dir,"train.p"),"wb") as f:

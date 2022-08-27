@@ -69,10 +69,11 @@ from .imagenet_utils import _obtain_input_shape
 from .imagenet_utils import decode_predictions
 from keras import backend as K
 import keras_retinanet.models.retinanet
+from keras_retinanet.models.retinanet import custom_objects
 
 
-BASE_WEIGHT_PATH = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.6/'
-
+BASE_WEIGHT_PATH = ('https://storage.googleapis.com/tensorflow/'
+                    'keras-applications/mobilenet/')
 
 def relu6(x):
     return K.relu(x, max_value=6)
@@ -284,13 +285,20 @@ class DepthwiseConv2D(Conv2D):
             self.depthwise_constraint)
         return config
 
+mobile_net_custom_objects = {
+    'relu6': relu6,
+    'DepthwiseConv2D': DepthwiseConv2D
+}
+
+custom_objects = custom_objects.copy()
+custom_objects.update(mobile_net_custom_objects)
 
 def MobileNet(input_shape=None,
               alpha=1.0,
               depth_multiplier=1,
               dropout=1,
               include_top=False,
-              weights=None,
+              weights='imagenet',
               input_tensor=None,
               pooling=None,
               classes=1000):
@@ -373,7 +381,7 @@ def MobileNet(input_shape=None,
         row_axis, col_axis = (0, 1)
     else:
         row_axis, col_axis = (1, 2)
- 
+
     if K.image_data_format() != 'channels_last':
         warnings.warn('The MobileNet family of models is only available '
                       'for the input data format "channels_last" '
@@ -425,6 +433,19 @@ def MobileNet(input_shape=None,
     x = _depthwise_conv_block(x, 1024, alpha, depth_multiplier, block_id=13)
     outputs.append(x)
 
+    if include_top:
+        x = GlobalAveragePooling2D(keepdims=True)(x)
+        x = Dropout(dropout, name='dropout')(x)
+        x = Conv2D(classes, (1, 1), padding='same', name='conv_preds')(x)
+        x = Reshape((classes,), name='reshape_2')(x)
+        imagenet_utils.validate_activation('softmax', weights)
+        x = Activation(activation='softmax',
+                            name='predictions')(x)
+    else:
+        if pooling == 'avg':
+            x = GlobalAveragePooling2D()(x)
+        elif pooling == 'max':
+            x = GlobalMaxPooling2D()(x)
 
     # Ensure that the model takes into account
     # any potential predecessors of `input_tensor`.
@@ -436,6 +457,33 @@ def MobileNet(input_shape=None,
     # Create model.
     model = Model(inputs= inputs, outputs= outputs , name='mobilenet')
 
+    # Load weights.
+    if weights == 'imagenet':
+        if alpha == 1.0:
+            alpha_text = '1_0'
+        elif alpha == 0.75:
+            alpha_text = '7_5'
+        elif alpha == 0.50:
+            alpha_text = '5_0'
+        else:
+            alpha_text = '2_5'
+
+        rows = 224
+
+        if include_top:
+            model_name = 'mobilenet_%s_%d_tf.h5' % (alpha_text, rows)
+            weight_path = BASE_WEIGHT_PATH + model_name
+            weights_path = get_file(
+                model_name, weight_path, cache_subdir='models')
+        else:
+            model_name = 'mobilenet_%s_%d_tf_no_top.h5' % (alpha_text, rows)
+            weight_path = BASE_WEIGHT_PATH + model_name
+            weights_path = get_file(
+                model_name, weight_path, cache_subdir='models')
+            model.load_weights(weights_path)
+    elif weights is not None:
+        model.load_weights(weights)
+        
     return model
 
 

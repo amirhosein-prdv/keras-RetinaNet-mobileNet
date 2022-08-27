@@ -75,6 +75,9 @@ class CSVGenerator(Generator):
 
     def name_to_label(self, name):
         return self.classes[name]
+    
+    def has_label(self, label):
+        return label in self.labels
 
     def label_to_name(self, label):
         return self.labels[label]
