@@ -1,11 +1,11 @@
 """
-Copyright 2017-2018 yhenon (https://github.com/yhenon/)
+Copyright 2017-2018 yhenon (https:/github.com/yhenon/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    http:/www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Simple training script for object detection from a CSV file.')
     parser.add_argument(
-        '--batch-size', help='Size of the batches.', default=1, type=int)
+        '--batch-size', help='Size of the batches.', default=5, type=int)
     parser.add_argument(
         '--alpha', help='alpha in Mobilenet.', default=1, type=float)
     return parser.parse_args()
@@ -52,10 +52,10 @@ def parse_args():
 if __name__ == '__main__':
     # parse arguments
     args = parse_args()
-    train_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\train.csv"
-    classes = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\classes.csv"
-    val_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\val.csv"
-    test_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\test.csv"
+    train_path = "content/Code/dataset/train.csv"
+    classes = "content/Code/dataset/classes.csv"
+    val_path = "content/Code/dataset/val.csv"
+    test_path = "content/Code/dataset/test.csv"
 
     setup_gpu('0')
     # get_session()
@@ -103,10 +103,10 @@ if __name__ == '__main__':
     model = create_model(num_classes=num_classes, alpha=args.alpha)
 
     metrics = [
-        # keras.metrics.AUC(),
-        # keras.metrics.Precision(),
-        # keras.metrics.Recall(),
-        # keras.metrics.MeanIoU(num_classes=1)
+        keras.metrics.AUC(),
+        keras.metrics.Precision(),
+        keras.metrics.Recall(),
+        keras.metrics.MeanIoU(num_classes=1)
     ]
     
     model.compile(
@@ -136,14 +136,14 @@ if __name__ == '__main__':
     # start training
     history= model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=train_generator.size() // (args.batch_size),
+        steps_per_epoch=train_generator.size() / (args.batch_size),
         # steps_per_epoch=5,
         epochs=100,
         verbose=1,
         max_queue_size=20,
         workers=4,
         validation_data=val_generator,
-        validation_steps=val_generator.size() // (args.batch_size),
+        validation_steps=val_generator.size() / (args.batch_size),
         callbacks=[
             keras.callbacks.ModelCheckpoint(checkpoint_fname, monitor='val_loss', verbose=1, save_best_only=True),
             keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=1, min_lr=0),
