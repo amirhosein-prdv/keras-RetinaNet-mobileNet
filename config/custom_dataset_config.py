@@ -5,7 +5,7 @@ import os
 # BASE_PATH = os.path.join(_path, 'code\\dataset')
 
 # Set the dataset base path here
-BASE_PATH = "/content/Code/dataset"
+BASE_PATH = "/content/code/dataset"
 
 # print(BASE_PATH)
 
