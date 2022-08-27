@@ -52,10 +52,10 @@ def parse_args():
 if __name__ == '__main__':
     # parse arguments
     args = parse_args()
-    train_path = "content/Code/dataset/train.csv"
-    classes = "content/Code/dataset/classes.csv"
-    val_path = "content/Code/dataset/val.csv"
-    test_path = "content/Code/dataset/test.csv"
+    train_path = "/content/Code/dataset/train.csv"
+    classes = "/content/Code/dataset/classes.csv"
+    val_path = "/content/Code/dataset/val.csv"
+    test_path = "/content/Code/dataset/test.csv"
 
     setup_gpu('0')
     # get_session()
