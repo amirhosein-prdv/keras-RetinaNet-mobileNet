@@ -67,10 +67,10 @@ def random_transform(
 
         # find bounding box again in augmented image
         [i, j] = np.where(mask == 255)
-        boxes[index, 0] = float(min(j))
-        boxes[index, 1] = float(min(i))
-        boxes[index, 2] = float(max(j))
-        boxes[index, 3] = float(max(i))
+        boxes[index, 0] = float(min(j, default=0))
+        boxes[index, 1] = float(min(i, default=0))
+        boxes[index, 2] = float(max(j, default=0))
+        boxes[index, 3] = float(max(i, default=0))
 
     # restore fill_mode
     image_data_generator.fill_mode = fill_mode

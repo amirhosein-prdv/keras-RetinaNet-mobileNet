@@ -56,9 +56,9 @@ if __name__ == '__main__':
     # parse arguments
     args = parse_args()
 
-    train_path = "/home/aragon/workspace/datasets/obj_detection_rdc2/train_linux.csv"
-    classes = "/home/aragon/workspace/datasets/obj_detection_rdc2/classes.csv"
-    val_path = "/home/aragon/workspace/datasets/obj_detection_rdc2/val_linux.csv"
+    train_path = "/content/code/dataset/train.csv"
+    classes = "/content/code/dataset/classes.csv"
+    val_path = "/content/code/dataset/val.csv"
 
     # create image data generator objects
     train_image_data_generator = keras.preprocessing.image.ImageDataGenerator(
@@ -125,7 +125,7 @@ if __name__ == '__main__':
             keras.callbacks.ReduceLROnPlateau(
                 monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=0, min_lr=0),
             keras.callbacks.EarlyStopping(
-                monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='auto')
+                monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto')
         ],
     )
     with open(os.path.join(model_dir, "train.p"), "wb") as f:
