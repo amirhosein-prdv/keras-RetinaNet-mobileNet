@@ -35,7 +35,7 @@ classes_csv = args["classes"]
 train_test_split = args["split"]
 
 # grab all image paths then construct the training and testing split
-imagePaths = list(paths.list_files(images_path))
+imagePaths = list(paths.list_images(images_path))
 random.seed(1234)
 random.shuffle(imagePaths)
 i = int(len(imagePaths) * train_test_split)
