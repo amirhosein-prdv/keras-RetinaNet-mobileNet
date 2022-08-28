@@ -164,37 +164,3 @@ if __name__ == '__main__':
     plt.ylabel("loss")
     plt.grid(1)
     plt.savefig(os.path.join(model_dir,"training.png"))
-
-    from keras_retinanet.utils.eval import evaluate
-    from keras_retinanet.models.mobilenet import custom_objects
-    from keras_retinanet.preprocessing.csv_generator import CSVGenerator
-
-    verbose = 1
-    logs = {}
-
-    # run evaluation
-    average_precisions, _ = evaluate(
-        generator=test_generator,
-        model=model,
-        iou_threshold=0.5,
-        score_threshold=0.05,
-        max_detections=100,
-        save_path=None,
-    )
-
-    # compute per class average precision
-    total_instances = []
-    precisions = []
-    for label, (average_precision, num_annotations) in average_precisions.items():
-        if verbose == 1:
-            print('{:.0f} instances of class'.format(num_annotations),
-                    generator.label_to_name(label), 'with average precision: {:.4f}'.format(average_precision))
-        total_instances.append(num_annotations)
-        precisions.append(average_precision)
-
-    mean_ap = sum(precisions) / sum(x > 0 for x in total_instances)
-
-    logs['mAP'] = mean_ap
-
-    if verbose == 1:
-        print('mAP: {:.4f}'.format(mean_ap))
