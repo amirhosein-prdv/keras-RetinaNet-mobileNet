@@ -44,7 +44,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Simple training script for object detection from a CSV file.')
     parser.add_argument(
-        '--batch-size', help='Size of the batches.', default=1, type=int)
+        '--batch-size', help='Size of the batches.', default=5, type=int)
     parser.add_argument(
         '--alpha', help='alpha in Mobilenet.', default=1, type=float)
     return parser.parse_args()
@@ -57,13 +57,9 @@ if __name__ == '__main__':
     val_path = "/content/code/dataset/val.csv"
     test_path = "/content/code/dataset/test.csv"
 
-    # setup_gpu('0')
-    # # get_session()
+    setup_gpu('0')
     # get_session()
-    if tf.config.list_physical_devices('GPU'):
-        physical_devices = tf.config.list_physical_devices('GPU')
-        tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-        tf.config.experimental.set_virtual_device_configuration(physical_devices[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+    get_session()
 
     # create image data generator objects
     train_image_data_generator = keras.preprocessing.image.ImageDataGenerator(
