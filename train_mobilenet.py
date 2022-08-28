@@ -57,10 +57,14 @@ if __name__ == '__main__':
     val_path = "/content/code/dataset/val.csv"
     test_path = "/content/code/dataset/test.csv"
 
-    setup_gpu('0')
+    # setup_gpu('0')
+    # # get_session()
     # get_session()
-    get_session()
-    
+    if tf.config.list_physical_devices('GPU'):
+        physical_devices = tf.config.list_physical_devices('GPU')
+        tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+        tf.config.experimental.set_virtual_device_configuration(physical_devices[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+
     # create image data generator objects
     train_image_data_generator = keras.preprocessing.image.ImageDataGenerator(
         horizontal_flip=True,
