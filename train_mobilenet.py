@@ -44,7 +44,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Simple training script for object detection from a CSV file.')
     parser.add_argument(
-        '--batch-size', help='Size of the batches.', default=5, type=int)
+        '--batch-size', help='Size of the batches.', default=1, type=int)
     parser.add_argument(
         '--alpha', help='alpha in Mobilenet.', default=1, type=float)
     return parser.parse_args()
