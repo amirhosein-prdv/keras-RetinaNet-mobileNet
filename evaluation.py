@@ -1,5 +1,5 @@
 import keras
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 from keras_retinanet.preprocessing.csv_generator import CSVGenerator
 from keras_retinanet.utils.eval import evaluate
 from keras_retinanet.utils.gpu import setup_gpu
