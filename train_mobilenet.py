@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     setup_gpu('0')
     # get_session()
-
+    tf.config.experimental.set_visible_devices([], 'GPU')
     # create image data generator objects
     train_image_data_generator = keras.preprocessing.image.ImageDataGenerator(
         horizontal_flip=True,
