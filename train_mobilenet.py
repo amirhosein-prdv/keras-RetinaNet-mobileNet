@@ -108,7 +108,7 @@ if __name__ == '__main__':
     model = create_model(num_classes=num_classes, alpha=args.alpha)
 
     metrics = [
-        keras.metrics.AUC(),
+        # keras.metrics.AUC(),
         # keras.metrics.Precision(),
         # keras.metrics.Recall(),
         # keras.metrics.MeanIoU(num_classes=1)
