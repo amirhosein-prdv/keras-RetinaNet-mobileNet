@@ -57,7 +57,7 @@ if __name__ == '__main__':
     val_path = "/content/code/dataset/val.csv"
     test_path = "/content/code/dataset/test.csv"
 
-    setup_gpu('0')
+    # setup_gpu('0')
     # get_session()
     tf.config.experimental.set_visible_devices([], 'GPU')
     # create image data generator objects
