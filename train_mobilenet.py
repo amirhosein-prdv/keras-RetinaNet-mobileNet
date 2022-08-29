@@ -45,7 +45,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Simple training script for object detection from a CSV file.')
     parser.add_argument(
-        '--batch-size', help='Size of the batches.', default=2, type=int)
+        '--batch-size', help='Size of the batches.', default=1, type=int)
     parser.add_argument(
         '--alpha', help='alpha in Mobilenet.', default=1, type=float)
     return parser.parse_args()
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     history= model.fit_generator(
         generator=train_generator,
         steps_per_epoch=train_generator.size() // (args.batch_size),
-        epochs=1,
+        epochs=100,
         verbose=1,
         max_queue_size=20,
         workers=multiprocessing.cpu_count(),
