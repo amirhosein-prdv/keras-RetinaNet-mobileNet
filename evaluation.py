@@ -11,7 +11,7 @@ setup_gpu('0')
 classes = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\classes.csv"
 val_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\val.csv"
 test_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\test.csv"
-model_path = "D:\Amirhosein\Object_Detection\keras-retinanet-mobilenet\snapshots\mobilenet_a1_s8_rdc2\mobilenet_a1_s8_rdc2_best.h5"
+model_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_MobileNet\snapshots\mobilenet_a1_s8_rdc2\mobilenet_a1_s8_rdc2_best.h5"
 
 test_image_data_generator = keras.preprocessing.image.ImageDataGenerator()
 
