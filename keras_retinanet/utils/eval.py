@@ -21,6 +21,7 @@ from tensorflow import keras
 import numpy as np
 import os
 import time
+from tqdm import tqdm as t
 
 import cv2
 import progressbar
@@ -74,17 +75,26 @@ def _get_detections(generator, model, score_threshold=0.05, max_detections=100, 
     all_detections = [[None for i in range(generator.num_classes()) if generator.has_label(i)] for j in range(generator.size())]
     all_inferences = [None for i in range(generator.size())]
 
-    for i in progressbar.progressbar(range(generator.size()), prefix='Running network: '):
+    pbar = t(range(generator.size()))
+    # for i in progressbar.progressbar(range(generator.size()), prefix='Running network: '):
+    for i in pbar:
+        pbar.set_description('Running network: ')
+
         raw_image    = generator.load_image(i)
         image, scale = generator.resize_image(raw_image.copy())
         image = generator.preprocess_image(image)
+        # image = raw_image.copy()
+        # scale = 1.0
 
         if keras.backend.image_data_format() == 'channels_first':
             image = image.transpose((2, 0, 1))
 
         # run network
         start = time.time()
-        boxes, scores, labels = model.predict_on_batch(np.expand_dims(image, axis=0))[:3]
+        _, _, detections = model.predict_on_batch(np.expand_dims(image, axis=0))
+        boxes = detections[:, :, :4]
+        scores = detections[0, :, 4:]
+        labels = np.argmax(detections[:, :, 4:], axis=1)
         inference_time = time.time() - start
 
         # correct boxes for image scale
@@ -95,7 +105,7 @@ def _get_detections(generator, model, score_threshold=0.05, max_detections=100, 
 
         # select those scores
         scores = scores[0][indices]
-
+        # print(scores)
         # find the order with which to sort the scores
         scores_sort = np.argsort(-scores)[:max_detections]
 
@@ -103,11 +113,7 @@ def _get_detections(generator, model, score_threshold=0.05, max_detections=100, 
         image_boxes      = boxes[0, indices[scores_sort], :]
         image_scores     = scores[scores_sort]
         image_labels     = labels[0, indices[scores_sort]]
-        print('===============================================================')
-        print(indices)
-        print(boxes.shape)
-        print(scores.shape)
-        print(labels.shape)
+
         image_detections = np.concatenate([image_boxes, np.expand_dims(image_scores, axis=1), np.expand_dims(image_labels, axis=1)], axis=1)
 
         if save_path is not None:
@@ -141,7 +147,11 @@ def _get_annotations(generator):
     """
     all_annotations = [[None for i in range(generator.num_classes())] for j in range(generator.size())]
 
-    for i in progressbar.progressbar(range(generator.size()), prefix='Parsing annotations: '):
+    pbar = t(range(generator.size()))
+    # for i in progressbar.progressbar(range(generator.size()), prefix='Parsing annotations: '):
+    for i in pbar:
+        pbar.set_description('Parsing annotations: ')
+        
         # load the annotations
         annotations = generator.load_annotations(i)
 
@@ -161,7 +171,8 @@ def evaluate(
     iou_threshold=0.5,
     score_threshold=0.05,
     max_detections=100,
-    save_path=None
+    save_path=None,
+    verbose=1
 ):
     """ Evaluate a given dataset using a given model.
 
@@ -179,6 +190,7 @@ def evaluate(
     all_detections, all_inferences = _get_detections(generator, model, score_threshold=score_threshold, max_detections=max_detections, save_path=save_path)
     all_annotations    = _get_annotations(generator)
     average_precisions = {}
+    logs = {}
 
     # all_detections = pickle.load(open('all_detections.pkl', 'rb'))
     # all_annotations = pickle.load(open('all_annotations.pkl', 'rb'))
@@ -238,12 +250,42 @@ def evaluate(
         # compute recall and precision
         recall    = true_positives / num_annotations
         precision = true_positives / np.maximum(true_positives + false_positives, np.finfo(np.float64).eps)
+        logs[f'recall_of_{generator.label_to_name(label)}'] = recall[-1]
+        logs[f'precision_of_{generator.label_to_name(label)}'] = precision[-1]
+
+        # compute accuracy
+        accuracy = num_annotations / generator.size()
+        logs['accuracy'] = accuracy
 
         # compute average precision
         average_precision  = _compute_ap(recall, precision)
         average_precisions[label] = average_precision, num_annotations
+        logs[f'average_precision_of_{generator.label_to_name(label)}'] = average_precision
 
     # inference time
     inference_time = np.sum(all_inferences) / generator.size()
+    logs['inference_time'] = inference_time
 
-    return average_precisions, inference_time
+    # compute per class average precision
+    total_instances = []
+    precisions = []
+    for label, (average_precision, num_annotations) in average_precisions.items():
+        total_instances.append(num_annotations)
+        precisions.append(average_precision)
+
+    mean_ap = sum(precisions) / sum(x > 0 for x in total_instances)
+
+    logs['mAP'] = mean_ap
+
+    if verbose == 1:
+        string = '{:.0f} instances of class {} with:\n'.format(num_annotations, generator.label_to_name(label))
+        for k, v in logs.items():
+            string += '{}: {:.4f}\n'.format(k, v)
+        print(string)
+
+    if save_path is not None and verbose == 1:
+        file = open(save_path +"\logs.txt","w")
+        file.write(string)
+        file.close()
+        
+    return logs

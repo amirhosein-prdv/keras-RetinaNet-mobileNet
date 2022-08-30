@@ -28,6 +28,7 @@ import keras_retinanet
 from keras_retinanet.callbacks.eval import Evaluate
 import matplotlib.pyplot as plt
 from keras_retinanet.utils.gpu import setup_gpu
+import multiprocessing
 
 def get_session():
     config = tf.compat.v1.ConfigProto()
@@ -142,9 +143,9 @@ if __name__ == '__main__':
         epochs=100,
         verbose=1,
         max_queue_size=20,
-        workers=4,
+        workers=multiprocessing.cpu_count(),
         validation_data=val_generator,
-        validation_steps=val_generator.size() / (args.batch_size),
+        validation_steps=val_generator.size() // (args.batch_size),
         callbacks=[
             keras.callbacks.ModelCheckpoint(checkpoint_fname, monitor='val_loss', verbose=1, save_best_only=True),
             keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=1, min_lr=0),
@@ -164,4 +165,3 @@ if __name__ == '__main__':
     plt.ylabel("loss")
     plt.grid(1)
     plt.savefig(os.path.join(model_dir,"training.png"))
-

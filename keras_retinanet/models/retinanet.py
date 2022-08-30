@@ -30,7 +30,7 @@ custom_objects = {
     'Anchors'               : keras_retinanet.layers.Anchors,
     '_smooth_l1'            : keras_retinanet.losses.smooth_l1(),
     '_focal'                : keras_retinanet.losses.focal(),
-    'BatchNormalization'    : keras_resnet.layers.BatchNormalization,
+    'BatchNormalization'    : keras.layers.BatchNormalization,
 }
 
 
