@@ -1,11 +1,11 @@
-import cv2
+
 import keras
-import pandas as pd
 from keras.models import load_model
 from keras_retinanet.preprocessing.csv_generator import CSVGenerator
 from keras_retinanet.utils.eval import evaluate
 from keras_retinanet.utils.gpu import setup_gpu
 from keras_retinanet.models.mobilenet import custom_objects
+
 setup_gpu('0')
 
 classes = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\classes.csv"
