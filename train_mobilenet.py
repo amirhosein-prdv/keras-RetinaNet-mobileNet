@@ -147,8 +147,8 @@ if __name__ == '__main__':
         validation_steps=val_generator.size() // (args.batch_size),
         callbacks=[
             keras.callbacks.ModelCheckpoint(checkpoint_fname, monitor='val_loss', verbose=1, save_best_only=True),
-            keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=1, min_lr=0),
-            keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto'),
+            keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.09, patience=2, verbose=1, mode='auto', epsilon=0.00001, cooldown=1, min_lr=0),
+            keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=1, mode='auto'),
             # Evaluate(test_generator, weighted_average=True)
         ],
     )
