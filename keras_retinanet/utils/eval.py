@@ -201,7 +201,7 @@ def evaluate(
     for label in range(generator.num_classes()):
         if not generator.has_label(label):
             continue
-
+        detect_num = 0
         false_positives = np.zeros((0,))
         true_positives  = np.zeros((0,))
         scores          = np.zeros((0,))
@@ -226,6 +226,7 @@ def evaluate(
                 max_overlap         = overlaps[0, assigned_annotation]
 
                 if max_overlap >= iou_threshold and assigned_annotation not in detected_annotations:
+                    detect_num+=1
                     false_positives = np.append(false_positives, 0)
                     true_positives  = np.append(true_positives, 1)
                     detected_annotations.append(assigned_annotation)
@@ -254,7 +255,7 @@ def evaluate(
         logs[f'precision_of_{generator.label_to_name(label)}'] = precision[-1]
 
         # compute accuracy
-        accuracy = num_annotations / generator.size()
+        accuracy = detect_num / generator.size()
         logs['accuracy'] = accuracy
 
         # compute average precision
