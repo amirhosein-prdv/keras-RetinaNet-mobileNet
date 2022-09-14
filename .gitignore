@@ -4,7 +4,5 @@ __pycache__/
 tests
 snapshots
 examples
-README.md
+
 /output
-out_mobilenet+retinanet_1.rar
-out_mobilenet+retinanet_2.rar
