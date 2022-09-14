@@ -45,7 +45,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Simple training script for object detection from a CSV file.')
     parser.add_argument(
-        '--batch-size', help='Size of the batches.', default=1, type=int)
+        '--batch-size', help='Size of the batches.', default=2, type=int)
     parser.add_argument(
         '--alpha', help='alpha in Mobilenet.', default=1, type=float)
     return parser.parse_args()
@@ -53,10 +53,10 @@ def parse_args():
 if __name__ == '__main__':
     # parse arguments
     args = parse_args()
-    train_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\train.csv"
-    classes = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\classes.csv"
-    val_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\val.csv"
-    test_path = "D:\Amirhosein\Object_Detection\\tag-detection-retinanet_OtherNet\Code\dataset\\test.csv"
+    train_path = "D:\Amirhosein\Object_Detection\\tag-detection-RetinaNet\\tag-detection-retinanet_MobileNet\dataset\\train.csv"
+    classes = "D:\Amirhosein\Object_Detection\\tag-detection-RetinaNet\\tag-detection-retinanet_MobileNet\dataset\\classes.csv"
+    val_path = "D:\Amirhosein\Object_Detection\\tag-detection-RetinaNet\\tag-detection-retinanet_MobileNet\dataset\\val.csv"
+    test_path = "D:\Amirhosein\Object_Detection\\tag-detection-RetinaNet\\tag-detection-retinanet_MobileNet\dataset\\test.csv"
 
     setup_gpu('0')
     # get_session()
@@ -104,6 +104,9 @@ if __name__ == '__main__':
     print('Creating model, this may take a second...')
     model = create_model(num_classes=num_classes, alpha=args.alpha)
 
+
+    optimizer = keras.optimizers.adam(lr=2e-4, clipnorm=0.001)
+
     metrics = [
         # keras.metrics.AUC(),
         # keras.metrics.Precision(),
@@ -116,7 +119,7 @@ if __name__ == '__main__':
             'regression'    : keras_retinanet.losses.smooth_l1(),
             'classification': keras_retinanet.losses.focal()
         },
-        optimizer=keras.optimizers.adam(lr=2e-5, clipnorm=0.001),
+        optimizer=optimizer,
         metrics=metrics
     )
 
@@ -147,7 +150,7 @@ if __name__ == '__main__':
         validation_steps=val_generator.size() // (args.batch_size),
         callbacks=[
             keras.callbacks.ModelCheckpoint(checkpoint_fname, monitor='val_loss', verbose=1, save_best_only=True),
-            keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.09, patience=2, verbose=1, mode='auto', epsilon=0.00001, cooldown=1, min_lr=0),
+            keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.05, patience=5, verbose=1, mode='auto', epsilon=0.00001, cooldown=1, min_lr=0),
             keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=1, mode='auto'),
             # Evaluate(test_generator, weighted_average=True)
         ],

@@ -1,0 +1,7 @@
+88 instances of class tag with:
+recall_of_tag: 0.8295
+precision_of_tag: 0.8391
+accuracy: 0.8295
+average_precision_of_tag: 0.7425
+inference_time: 0.1351
+mAP: 0.7425

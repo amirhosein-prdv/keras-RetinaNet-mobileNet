@@ -37,9 +37,9 @@ custom_objects = {
 def default_classification_model(
     num_classes,
     num_anchors,
-    pyramid_feature_size=256,
+    pyramid_feature_size=128,
     prior_probability=0.01,
-    classification_feature_size=256,
+    classification_feature_size=128,
     name='classification_submodel'
 ):
     options = {
@@ -77,7 +77,7 @@ def default_classification_model(
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
 
 
-def default_regression_model(num_anchors, pyramid_feature_size=256, regression_feature_size=256, name='regression_submodel'):
+def default_regression_model(num_anchors, pyramid_feature_size=128, regression_feature_size=128, name='regression_submodel'):
     # All new conv layers except the final one in the
     # RetinaNet (classification) subnets are initialized
     # with bias b = 0 and a Gaussian weight fill with stddev = 0.01.
@@ -107,7 +107,7 @@ def default_regression_model(num_anchors, pyramid_feature_size=256, regression_f
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
 
 
-def __create_pyramid_features(C3, C4, C5, feature_size=256):
+def __create_pyramid_features(C3, C4, C5, feature_size=128):
     # upsample C5 to get P5 from the FPN paper
     P5           = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='P5')(C5)
     P5_upsampled = keras_retinanet.layers.UpsampleLike(name='P5_upsampled')([P5, C4])
@@ -193,6 +193,10 @@ def retinanet(
         submodels = default_submodels(num_classes, anchor_parameters)
 
     image = inputs
+
+    # Freeze all the layers
+    # for layer in backbone.layers[:]:
+    #     layer.trainable = False
 
     _, C3, C4, C5 = backbone.outputs  # we ignore C2
 
