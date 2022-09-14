@@ -4,5 +4,7 @@ __pycache__/
 tests
 snapshots
 examples
+README.md
 
+/out
 /output
