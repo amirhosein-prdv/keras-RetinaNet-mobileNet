@@ -6,6 +6,7 @@ from imutils import paths
 import argparse
 import random
 import os
+import shutil
 
 # Construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -62,12 +63,18 @@ for (dType, imagePaths, outputCSV) in dataset:
     # open the output CSV file
     csv = open(outputCSV, "w")
 
+    # p = os.path.join(config.BASE_PATH, 'dataset', dType)
+    # os.makedirs(p, exist_ok=1)
+
     # loop over the image paths
     for imagePath in imagePaths:
         # build the corresponding annotation path
         fname = imagePath.split(os.path.sep)[-1]
         fname = "{}.xml".format(fname[:fname.rfind(".")])
         annotPath = os.path.sep.join([annot_path, fname])
+
+        # shutil.copy(imagePath, p)
+        # shutil.copy(annotPath, p)
 
         # load the contents of the annotation file and buid the soup
         contents = open(annotPath).read()

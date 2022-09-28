@@ -2,9 +2,11 @@ __pycache__/
 *.pyc
 .vscode
 tests
-snapshots
+# snapshots
 examples
 README.md
 
 /out
 /output
+.ipynb_checkpoints/*
+snapshots/*

@@ -104,6 +104,9 @@ if __name__ == '__main__':
     print('Creating model, this may take a second...')
     model = create_model(num_classes=num_classes, alpha=args.alpha)
 
+
+    optimizer = keras.optimizers.adam(lr=2e-4, clipnorm=0.001)
+
     metrics = [
         # keras.metrics.AUC(),
         # keras.metrics.Precision(),
@@ -116,7 +119,7 @@ if __name__ == '__main__':
             'regression'    : keras_retinanet.losses.smooth_l1(),
             'classification': keras_retinanet.losses.focal()
         },
-        optimizer=keras.optimizers.adam(lr=2e-5, clipnorm=0.001),
+        optimizer=optimizer,
         metrics=metrics
     )
 
@@ -138,8 +141,7 @@ if __name__ == '__main__':
     # start training
     history= model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=train_generator.size() / (args.batch_size),
-        # steps_per_epoch=5,
+        steps_per_epoch=train_generator.size() // (args.batch_size),
         epochs=100,
         verbose=1,
         max_queue_size=20,
@@ -148,8 +150,8 @@ if __name__ == '__main__':
         validation_steps=val_generator.size() // (args.batch_size),
         callbacks=[
             keras.callbacks.ModelCheckpoint(checkpoint_fname, monitor='val_loss', verbose=1, save_best_only=True),
-            keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='auto', epsilon=0.0001, cooldown=1, min_lr=0),
-            keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto'),
+            keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.05, patience=5, verbose=1, mode='auto', epsilon=0.00001, cooldown=1, min_lr=0),
+            keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=1, mode='auto'),
             # Evaluate(test_generator, weighted_average=True)
         ],
     )
