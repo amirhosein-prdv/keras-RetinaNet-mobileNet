@@ -7,7 +7,7 @@ from keras.models import load_model
 from keras_retinanet.preprocessing.csv_generator import CSVGenerator
 from keras_retinanet.utils.eval import evaluate
 from keras_retinanet.utils.gpu import setup_gpu
-from keras_retinanet.models.mobilenet import custom_objects
+from keras_retinanet.models.mobilenet import CUSTOM_OBJECTS
 setup_gpu('0')
 
 model_path = '/content/gdrive/MyDrive/retinanet.h5'
@@ -15,6 +15,6 @@ model_path = '/content/gdrive/MyDrive/retinanet.h5'
 from keras import backend as K
 
 K.set_learning_phase(0)
-model = load_model(model_path, custom_objects=custom_objects)
+model = load_model(model_path, custom_objects=CUSTOM_OBJECTS)
 
 model.summary()
