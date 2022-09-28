@@ -290,8 +290,8 @@ mobile_net_custom_objects = {
     'DepthwiseConv2D': DepthwiseConv2D
 }
 
-custom_objects = custom_objects.copy()
-custom_objects.update(mobile_net_custom_objects)
+CUSTOM_OBJECTS = custom_objects.copy()
+CUSTOM_OBJECTS.update(mobile_net_custom_objects)
 
 def MobileNet(input_shape=None,
               alpha=1.0,
