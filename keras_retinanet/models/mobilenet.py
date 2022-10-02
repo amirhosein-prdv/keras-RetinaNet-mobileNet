@@ -62,7 +62,7 @@ from keras import regularizers
 from keras import constraints
 from keras.utils import conv_utils
 from keras.utils.data_utils import get_file
-from keras.engine.topology import get_source_inputs
+from keras.utils.layer_utils import get_source_inputs
 from keras.engine import InputSpec
 from . import imagenet_utils
 from .imagenet_utils import _obtain_input_shape
